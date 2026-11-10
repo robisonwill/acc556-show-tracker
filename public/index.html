@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a20">
+  <title>Show Tracker · ACC 556</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <span class="brand"><span class="brand-mark" aria-hidden="true">▶</span> Show Tracker</span>
+      <div class="session">
+        <span id="connection" class="connection" role="status">Starting</span>
+        <button type="button" class="secondary" id="sign-out" hidden>Sign out</button>
+      </div>
+    </div>
+  </header>
+  <main class="frame">
+    <div id="message" class="notice" role="alert" hidden></div>
+    <section id="login" class="login panel" hidden>
+      <p class="eyebrow">Household access</p>
+      <h1>Sign in</h1>
+      <p>Use your household’s Supabase account to open the catalog and shared watch history.</p>
+      <form id="login-form">
+        <label>Email<input type="email" name="email" autocomplete="username" required></label>
+        <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+        <button type="submit">Open catalog</button>
+      </form>
+    </section>
+    <section id="discover" hidden>
+      <div class="intro">
+        <p class="eyebrow">Your household catalog</p>
+        <h1>Find your next show.</h1>
+        <p>Browse by subscription and episode ratings, then pick up where you left off.</p>
+      </div>
+      <form id="filters" class="filters panel" aria-label="Filter shows">
+        <label>Title<input name="title" type="search" placeholder="Search titles"></label>
+        <label>Primary genre<select name="genre"><option value="">All genres</option></select></label>
+        <label>Awards<select name="award">
+          <option value="">Any award status</option>
+          <option value="has_award_wins">Has wins</option>
+          <option value="has_award_nominations">Has nominations</option>
+        </select></label>
+        <label>Streaming service<select name="service">
+          <option value="">All services</option>
+          <option value="subscribed">Any subscribed service</option>
+        </select></label>
+        <label>Minimum average episode IMDb rating<select name="minimum">
+          <option value="">Any rating</option>
+          <option value="7">7.0+</option>
+          <option value="8">8.0+</option>
+          <option value="8.5">8.5+</option>
+          <option value="9">9.0+</option>
+        </select></label>
+        <button type="reset" class="secondary">Clear filters</button>
+      </form>
+      <div class="section-head">
+        <h2>Shows</h2>
+        <p id="result-count" role="status"></p>
+      </div>
+      <div id="results" class="results"></div>
+      <p class="footnote">Streaming availability reflects the dates in your catalog. Each average uses episodes with IMDb ratings.</p>
+    </section>
+    <section id="detail" hidden aria-labelledby="show-title">
+      <button type="button" class="secondary back" id="back">← Back to shows</button>
+      <div id="show-overview"></div>
+      <div id="season-list"></div>
+    </section>
+  </main>
+  <dialog id="watch-dialog" aria-labelledby="watch-title">
+    <form id="watch-form">
+      <p class="eyebrow">Shared watch history</p>
+      <h2 id="watch-title">Mark episode watched</h2>
+      <p id="watch-episode"></p>
+      <label>Household rating (optional, 0–10)<input name="rating" type="number" min="0" max="10" step="0.1" placeholder="Leave blank to skip"></label>
+      <p id="watch-error" class="notice" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="cancel-watch" class="secondary">Cancel</button>
+        <button type="submit" id="save-watch">Save watched episode</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

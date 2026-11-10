@@ -12,3 +12,8 @@ build/
 .next/
 coverage/
 *.log
+
+# Course and QA materials belong outside the app repository.
+screenshots/
+submissions/
+research/
