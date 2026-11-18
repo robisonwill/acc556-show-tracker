@@ -32,16 +32,13 @@ label { display: grid; gap: .3rem; font-size: .88rem; font-weight: 650; }
 .brand-mark { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding-left: .08rem; border-radius: .55rem; background: var(--accent); color: #102522; font-size: .8rem; }
 .session { display: flex; align-items: center; gap: .6rem; font-size: .85rem; }
 .connection { color: var(--muted); border: 1px solid var(--line); border-radius: 2rem; padding: .28rem .68rem; }
-.connection[data-live] { color: var(--accent); border-color: #39745f; background: #163730; }
 main { padding-block: 1.5rem 3rem; }
 .panel { border: 1px solid var(--line); border-radius: .9rem; background: var(--panel); }
 .notice { border: 1px solid #9e6a5d; background: #382824; color: #ffd7ca; padding: .8rem 1rem; border-radius: .55rem; margin-bottom: 1rem; }
 .eyebrow { color: var(--accent); font-size: .76rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
 .muted, .footnote, .section-head p, .intro > p:not(.eyebrow):not(.rating) { color: var(--muted); }
 .intro { display: grid; gap: .65rem; padding-block: 1.35rem 1.7rem; }
-.login { max-width: 32rem; margin: min(6vw, 4rem) auto; padding: clamp(1.15rem, 4vw, 2rem); display: grid; gap: .75rem; }
-.login form, dialog form { display: grid; gap: .9rem; }
-.login form { margin-top: .5rem; }
+dialog form { display: grid; gap: .9rem; }
 .filters { padding: 1rem; display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.2fr 1.15fr auto; align-items: end; gap: .8rem; }
 .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-block: 1.8rem .75rem; }
 .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; }

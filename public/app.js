@@ -1,12 +1,8 @@
 import { buildCatalog, filterCatalog, localDate, viewingProgress } from './catalog.js';
-import { createSupabase } from './supabase.js';
 
 const byId = id => document.getElementById(id);
 const connection = byId('connection');
 const message = byId('message');
-const login = byId('login');
-const loginForm = byId('login-form');
-const signOut = byId('sign-out');
 const discover = byId('discover');
 const filters = byId('filters');
 const detail = byId('detail');
@@ -40,25 +36,6 @@ function button(text, onClick, className) {
 function showMessage(text) {
   message.textContent = text;
   message.hidden = !text;
-}
-
-function signedOut(text) {
-  database.clearSession();
-  shows = [];
-  selectedShow = selectedEpisode = undefined;
-  openSeasons.clear();
-  detail.hidden = discover.hidden = signOut.hidden = true;
-  byId('results').replaceChildren();
-  overview.replaceChildren();
-  byId('season-list').replaceChildren();
-  if (dialog.open) dialog.close();
-  watchForm.reset();
-  watchError.hidden = true;
-  byId('watch-episode').textContent = '';
-  delete connection.dataset.live;
-  connection.textContent = 'Signed out';
-  login.hidden = false;
-  showMessage(text);
 }
 
 function addChoices(select, options, defaults) {
@@ -219,76 +196,65 @@ byId('back').addEventListener('click', () => {
 filters.addEventListener('input', renderCatalog);
 filters.addEventListener('submit', event => event.preventDefault());
 filters.addEventListener('reset', () => queueMicrotask(renderCatalog));
-signOut.addEventListener('click', () => signedOut(''));
 cancelButton.addEventListener('click', () => dialog.close());
 dialog.addEventListener('cancel', event => {
   if (saving) event.preventDefault();
 });
 
-watchForm.addEventListener('submit', async event => {
+watchForm.addEventListener('submit', event => {
   event.preventDefault();
   const episode = selectedEpisode;
   if (saving || !episode) return;
   const input = watchForm.elements.rating.value;
-  saving = saveButton.disabled = cancelButton.disabled = signOut.disabled = true;
+  saving = saveButton.disabled = cancelButton.disabled = true;
   saveButton.textContent = 'Saving…';
   watchError.hidden = true;
   try {
-    episode.progress = await database.markWatched(episode.episode_id, localDate(), input === '' ? null : Number(input));
+    episode.progress = database.markWatched(episode.episode_id, localDate(), input === '' ? null : Number(input));
     dialog.close();
     renderDetail('mark-next');
   } catch (error) {
-    if (error.status === 401) {
-      signedOut('Your session expired. Sign in again to check whether the episode was saved.');
-    } else {
-      watchError.textContent = `Unable to confirm the save. ${error.message}`;
-      watchError.hidden = false;
-    }
+    watchError.textContent = `Unable to save progress. ${error.message}`;
+    watchError.hidden = false;
   } finally {
-    saving = saveButton.disabled = cancelButton.disabled = signOut.disabled = false;
+    saving = saveButton.disabled = cancelButton.disabled = false;
     saveButton.textContent = 'Save watched episode';
   }
 });
 
-loginForm.addEventListener('submit', async event => {
-  event.preventDefault();
-  const submit = loginForm.querySelector('button');
-  submit.disabled = true;
-  connection.textContent = 'Connecting…';
-  showMessage('');
-  const email = loginForm.elements.email.value.trim();
-  const password = loginForm.elements.password.value;
-  loginForm.elements.password.value = '';
-  try {
-    await database.signIn(email, password);
-    const data = await database.loadCatalog();
-    if (!data.shows.length) throw new Error('The account cannot see any shows. Verify household access in Supabase.');
-    shows = buildCatalog(data);
-    login.hidden = true;
-    discover.hidden = signOut.hidden = false;
-    connection.textContent = 'Live Supabase';
-    connection.dataset.live = 'true';
-    configureFilters(data.services);
-    renderCatalog();
-    filters.elements.title.focus();
-  } catch (error) {
-    signedOut(`Unable to open the catalog. ${error.message}`);
-  } finally {
-    submit.disabled = false;
+function localDatabase(seed) {
+  const storageKey = 'acc556-local-progress-v1';
+  const records = new Map(seed.progress.map(row => [row.episode_id, row]));
+  function readSaved() {
+    return JSON.parse(localStorage.getItem(storageKey) ?? '{}');
   }
-});
+  return {
+    loadCatalog() {
+      const saved = Object.values(readSaved());
+      return { ...seed, progress: [...seed.progress, ...saved.filter(row => !records.has(row.episode_id))] };
+    },
+    markWatched(episodeId, watchedOn, rating) {
+      const saved = readSaved();
+      const existing = records.get(episodeId) ?? saved[episodeId];
+      if (existing) return existing;
+      const row = { episode_id: episodeId, watched_on: watchedOn, our_rating: rating };
+      saved[episodeId] = row;
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+      return row;
+    },
+  };
+}
 
 try {
-  const config = await fetch('/config.json').then(response => response.json());
-  if (config.url && config.key) {
-    database = createSupabase(config);
-    connection.title = new URL(config.url).hostname;
-    signedOut('');
-  } else {
-    connection.textContent = 'Setup required';
-    showMessage('Set the project URL and Supabase publishable key in .env, then restart the app. See README.md.');
-  }
-} catch {
+  database = localDatabase(JSON.parse(byId('sample-catalog').textContent));
+  const data = database.loadCatalog();
+  shows = buildCatalog(data);
+  discover.hidden = false;
+  connection.textContent = 'Local sample data';
+  configureFilters(data.services);
+  renderCatalog();
+  filters.elements.title.focus();
+} catch (error) {
   connection.textContent = 'Setup error';
-  showMessage('Unable to load configuration. Restart the local server and reload the page.');
+  showMessage(`Unable to open Show Tracker. ${error.message}`);
 }

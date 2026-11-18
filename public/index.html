@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#111a20">
   <title>Show Tracker · ACC 556</title>
   <link rel="stylesheet" href="/style.css">
-  <script type="module" src="/app.js"></script>
 </head>
 <body>
   <header class="masthead">
@@ -14,22 +13,11 @@
       <span class="brand"><span class="brand-mark" aria-hidden="true">▶</span> Show Tracker</span>
       <div class="session">
         <span id="connection" class="connection" role="status">Starting</span>
-        <button type="button" class="secondary" id="sign-out" hidden>Sign out</button>
       </div>
     </div>
   </header>
   <main class="frame">
     <div id="message" class="notice" role="alert" hidden></div>
-    <section id="login" class="login panel" hidden>
-      <p class="eyebrow">Household access</p>
-      <h1>Sign in</h1>
-      <p>Use your household’s Supabase account to open the catalog and shared watch history.</p>
-      <form id="login-form">
-        <label>Email<input type="email" name="email" autocomplete="username" required></label>
-        <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
-        <button type="submit">Open catalog</button>
-      </form>
-    </section>
     <section id="discover" hidden>
       <div class="intro">
         <p class="eyebrow">Your household catalog</p>

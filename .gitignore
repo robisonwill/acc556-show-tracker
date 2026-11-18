@@ -12,6 +12,7 @@ build/
 .next/
 coverage/
 *.log
+.local-catalog.json
 
 # Course and QA materials belong outside the app repository.
 screenshots/
