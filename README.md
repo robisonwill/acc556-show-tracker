@@ -1,8 +1,8 @@
 # Show Tracker
 
-Download **Show Tracker.zip** from the [latest GitHub release](https://github.com/robisonwill/acc556-show-tracker/releases/latest). In Windows, right-click the ZIP, select **Extract All**, and double-click **Show Tracker.html** in the extracted folder. You can also open that HTML file from the repository's source ZIP.
+Download **Show-Tracker.zip** from the [latest GitHub release](https://github.com/robisonwill/acc556-show-tracker/releases/latest). In Windows, right-click the ZIP, select **Extract All**, and double-click **Show Tracker.html** in the extracted folder. You can also open that HTML file from the repository's source ZIP.
 
-The app runs in your browser with the sample catalog and stores new watched episodes in that browser. Keep opening the same file from the same location to retain progress. The browser keeps progress for the downloaded file separately from the localhost preview.
+The app runs offline with a 60-show snapshot of the Supabase catalog and the original sample viewing history. New watch progress saves in your browser. If you already use a downloaded copy, replace the old HTML with the new file at the same path and open it in the same browser profile to keep your progress. The browser keeps progress for the downloaded file separately from the localhost preview.
 
 ## Development
 
