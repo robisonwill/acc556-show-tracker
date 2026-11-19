@@ -1,4 +1,5 @@
-import { buildCatalog, filterCatalog, localDate, viewingProgress } from './catalog.js';
+import { buildCatalog, filterCatalog, viewingProgress } from './catalog.js';
+import { createDatabase } from './database.js';
 
 const byId = id => document.getElementById(id);
 const connection = byId('connection');
@@ -201,7 +202,7 @@ dialog.addEventListener('cancel', event => {
   if (saving) event.preventDefault();
 });
 
-watchForm.addEventListener('submit', event => {
+watchForm.addEventListener('submit', async event => {
   event.preventDefault();
   const episode = selectedEpisode;
   if (saving || !episode) return;
@@ -210,7 +211,7 @@ watchForm.addEventListener('submit', event => {
   saveButton.textContent = 'Saving…';
   watchError.hidden = true;
   try {
-    episode.progress = database.markWatched(episode.episode_id, localDate(), input === '' ? null : Number(input));
+    episode.progress = await database.markWatched(episode.episode_id, input === '' ? null : Number(input));
     dialog.close();
     renderDetail('mark-next');
   } catch (error) {
@@ -222,39 +223,22 @@ watchForm.addEventListener('submit', event => {
   }
 });
 
-function localDatabase(seed) {
-  const storageKey = 'acc556-local-progress-v1';
-  const records = new Map(seed.progress.map(row => [row.episode_id, row]));
-  function readSaved() {
-    return JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+async function start() {
+  connection.textContent = 'Connecting to Supabase…';
+  try {
+    database = createDatabase(JSON.parse(byId('connection-config').textContent));
+    const data = await database.loadCatalog();
+    shows = buildCatalog(data);
+    discover.hidden = false;
+    connection.textContent = 'Live Supabase';
+    connection.title = 'ACC556 Final Project -- Will Robison';
+    configureFilters(data.services);
+    renderCatalog();
+    filters.elements.title.focus();
+  } catch (error) {
+    connection.textContent = 'Connection error';
+    showMessage(`Unable to open Show Tracker. ${error.message}`);
+    message.append(button('Retry connection', () => location.reload(), 'secondary'));
   }
-  return {
-    loadCatalog() {
-      const saved = Object.values(readSaved());
-      return { ...seed, progress: [...seed.progress, ...saved.filter(row => !records.has(row.episode_id))] };
-    },
-    markWatched(episodeId, watchedOn, rating) {
-      const saved = readSaved();
-      const existing = records.get(episodeId) ?? saved[episodeId];
-      if (existing) return existing;
-      const row = { episode_id: episodeId, watched_on: watchedOn, our_rating: rating };
-      saved[episodeId] = row;
-      localStorage.setItem(storageKey, JSON.stringify(saved));
-      return row;
-    },
-  };
 }
-
-try {
-  database = localDatabase(JSON.parse(byId('sample-catalog').textContent));
-  const data = database.loadCatalog();
-  shows = buildCatalog(data);
-  discover.hidden = false;
-  connection.textContent = 'Local sample data';
-  configureFilters(data.services);
-  renderCatalog();
-  filters.elements.title.focus();
-} catch (error) {
-  connection.textContent = 'Setup error';
-  showMessage(`Unable to open Show Tracker. ${error.message}`);
-}
+start();

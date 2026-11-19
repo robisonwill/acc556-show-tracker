@@ -1,15 +1,23 @@
 # Show Tracker
 
-Download **Show-Tracker.zip** from the [latest GitHub release](https://github.com/robisonwill/acc556-show-tracker/releases/latest). In Windows, right-click the ZIP, select **Extract All**, and double-click **Show Tracker.html** in the extracted folder. You can also open that HTML file from the repository's source ZIP.
+Open [Show Tracker](https://robisonwill.github.io/acc556-show-tracker/) to browse the live Supabase catalog and record shared viewing progress. The app opens directly into the catalog. It needs an internet connection.
 
-The app runs offline with a 60-show snapshot of the Supabase catalog and the original sample viewing history. New watch progress saves in your browser. If you already use a downloaded copy, replace the old HTML with the new file at the same path and open it in the same browser profile to keep your progress. The browser keeps progress for the downloaded file separately from the localhost preview.
+## Use the app
 
-## Development
+Filter by title, genre, award wins or nominations, subscribed service, and minimum average episode IMDb rating. Open a show and select Mark next watched. The optional household rating is separate from IMDb. Saving creates a progress record in Supabase and updates completion and the next episode after the database confirms the write.
 
-## SQL and Supabase
+Progress is shared with everyone using the app. Existing records are preserved when an episode is submitted again. The database supplies the watch date.
 
-The [discovery and progress query](sql/discovery_progress.sql) can be run in the SQL Editor of ACC556 Final Project -- Will Robison. It returns subscribed shows, average episode IMDb ratings, completion percentages, and each show's first unwatched episode.
+## Connection and queries
 
-The downloadable app uses a bundled snapshot. Its catalog filters and progress calculations are in [public/catalog.js](public/catalog.js), and its browser storage writes are in [public/app.js](public/app.js). Running the SQL separately queries live Supabase. Changes saved in the offline app stay in that browser.
+[public/database.js](public/database.js) contains the live Data API reads and writes. It selects IDs as strings and fetches every API page. [public/catalog.js](public/catalog.js) contains filters, average episode IMDb ratings, completion, and next-episode calculations. [public/app.js](public/app.js) renders the interface.
 
-The standalone HTML contains the interface, catalog, and browser storage logic. From the full course workspace run `node phase4/prepare-local.mjs` to regenerate the sample catalog. From this repository run `node build.mjs` to rebuild the HTML and `node --test` to check catalog and progress calculations. Use `node server.js` to preview the same HTML at a local browser address.
+Run [sql/discovery_progress.sql](sql/discovery_progress.sql) in the Final Project Supabase SQL Editor to see subscribed shows, average episode IMDb ratings, completion, and next unwatched episodes. [sql/live-demo-access.review.sql](sql/live-demo-access.review.sql) records the reviewed access policies applied for the demo.
+
+The browser uses a publishable Supabase key. Anonymous clients can read the catalog and shared history and add watched episodes under the database policies. The generated HTML includes this public connection configuration.
+
+## GitHub Pages and development
+
+GitHub Pages publishes the `docs/` directory from `main`. To build, set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in an ignored local .env file, then run `node --env-file=.env build.mjs`. The build writes `Show Tracker.html` and `docs/index.html` with the same live app. Only the Final Project URL and a publishable key are accepted.
+
+Run `node --test` for catalog rule tests. To preview the generated HTML locally, run `node server.js`. You can also download the ZIP from [Releases](https://github.com/robisonwill/acc556-show-tracker/releases/latest), extract it, and open Show Tracker.html in your browser.

@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a20">
+  <title>Show Tracker · ACC 556</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --ink: #f1f5f5;
+  --muted: #acbac1;
+  --background: #111a20;
+  --panel: #1a272e;
+  --line: #374951;
+  --accent: #8aedd0;
+  font: 16px/1.55 system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--background); color: var(--ink); }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(2.2rem, 5.5vw, 4.35rem); line-height: 1.06; letter-spacing: -.055em; }
+h2 { font-size: 1.55rem; letter-spacing: -.025em; }
+h3 { line-height: 1.2; }
+button, input, select { font: inherit; }
+button, input, select { border: 1px solid var(--line); border-radius: .55rem; padding: .6rem .85rem; }
+button { background: var(--accent); color: #102522; border-color: transparent; font-weight: 700; cursor: pointer; }
+button:hover { filter: brightness(1.12); }
+button:disabled { cursor: wait; opacity: .6; }
+button.secondary { background: #22323a; color: var(--ink); border-color: var(--line); }
+input, select { min-width: 0; width: 100%; color: var(--ink); background: #10191f; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+label { display: grid; gap: .3rem; font-size: .88rem; font-weight: 650; }
+.frame { width: min(100% - 2rem, 73rem); margin-inline: auto; }
+.masthead { background: #152127; border-bottom: 1px solid var(--line); }
+.masthead-inner { min-height: 4.2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; padding-block: .5rem; }
+.brand { display: flex; align-items: center; gap: .6rem; font-weight: 760; }
+.brand-mark { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding-left: .08rem; border-radius: .55rem; background: var(--accent); color: #102522; font-size: .8rem; }
+.session { display: flex; align-items: center; gap: .6rem; font-size: .85rem; }
+.connection { color: var(--muted); border: 1px solid var(--line); border-radius: 2rem; padding: .28rem .68rem; }
+main { padding-block: 1.5rem 3rem; }
+.panel { border: 1px solid var(--line); border-radius: .9rem; background: var(--panel); }
+.notice { border: 1px solid #9e6a5d; background: #382824; color: #ffd7ca; padding: .8rem 1rem; border-radius: .55rem; margin-bottom: 1rem; }
+.eyebrow { color: var(--accent); font-size: .76rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+.muted, .footnote, .section-head p, .intro > p:not(.eyebrow):not(.rating) { color: var(--muted); }
+.intro { display: grid; gap: .65rem; padding-block: 1.35rem 1.7rem; }
+dialog form { display: grid; gap: .9rem; }
+.filters { padding: 1rem; display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.2fr 1.15fr auto; align-items: end; gap: .8rem; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-block: 1.8rem .75rem; }
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .85rem; }
+.card { display: flex; flex-direction: column; align-items: flex-start; gap: .6rem; padding: 1.1rem; }
+.title-button { color: var(--ink); background: none; border: 0; padding: 0; text-align: left; font-size: 1.45rem; }
+.title-button:hover { color: var(--accent); text-decoration: underline; }
+.rating { font-size: .87rem; font-weight: 700; color: #ffdb94; }
+.tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+.tag { border-radius: 2rem; background: #2a3a42; color: #dbe7eb; padding: .25rem .55rem; font-size: .77rem; }
+.tag.subscribed { color: var(--accent); background: #163730; }
+.card-progress { margin-top: auto; padding-top: .6rem; font-size: .9rem; color: var(--muted); }
+.empty { padding: 1rem; grid-column: 1 / -1; }
+.footnote { font-size: .85rem; margin-top: 1rem; }
+.progress-panel { padding: clamp(1rem, 3vw, 1.5rem); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.progress-panel h2 { font-size: clamp(1.7rem, 4vw, 2.45rem); }
+progress { width: min(22rem, 100%); accent-color: var(--accent); }
+.next { color: var(--accent); margin-top: .55rem; font-weight: 700; }
+.season-heading { margin-block: 1.75rem .65rem; }
+.season { margin-bottom: .55rem; }
+.season summary { padding: .85rem 1rem; cursor: pointer; font-weight: 700; }
+.episodes { list-style: none; padding: 0 1rem; margin: 0; }
+.episode { border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem 1rem; padding: .7rem 0; font-size: .9rem; }
+dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: .9rem; padding: 1.3rem; width: min(28rem, 100% - 2rem); }
+dialog::backdrop { background: #050b10cc; }
+dialog .notice { margin: 0; }
+.actions { display: flex; justify-content: end; flex-wrap: wrap; gap: .6rem; }
+
+@media (max-width: 66rem) {
+  .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 40rem) {
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters > label:first-child { grid-column: 1 / -1; }
+  .filters > button { justify-self: start; }
+}
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <span class="brand"><span class="brand-mark" aria-hidden="true">▶</span> Show Tracker</span>
+      <div class="session">
+        <span id="connection" class="connection" role="status">Starting</span>
+      </div>
+    </div>
+  </header>
+  <main class="frame">
+    <div id="message" class="notice" role="alert" hidden></div>
+    <section id="discover" hidden>
+      <div class="intro">
+        <p class="eyebrow">Your household catalog</p>
+        <h1>Find your next show.</h1>
+        <p>Browse by subscription and episode ratings, then pick up where you left off.</p>
+      </div>
+      <form id="filters" class="filters panel" aria-label="Filter shows">
+        <label>Title<input name="title" type="search" placeholder="Search titles"></label>
+        <label>Primary genre<select name="genre"><option value="">All genres</option></select></label>
+        <label>Awards<select name="award">
+          <option value="">Any award status</option>
+          <option value="has_award_wins">Has wins</option>
+          <option value="has_award_nominations">Has nominations</option>
+        </select></label>
+        <label>Streaming service<select name="service">
+          <option value="">All services</option>
+          <option value="subscribed">Any subscribed service</option>
+        </select></label>
+        <label>Minimum average episode IMDb rating<select name="minimum">
+          <option value="">Any rating</option>
+          <option value="7">7.0+</option>
+          <option value="8">8.0+</option>
+          <option value="8.5">8.5+</option>
+          <option value="9">9.0+</option>
+        </select></label>
+        <button type="reset" class="secondary">Clear filters</button>
+      </form>
+      <div class="section-head">
+        <h2>Shows</h2>
+        <p id="result-count" role="status"></p>
+      </div>
+      <div id="results" class="results"></div>
+      <p class="footnote">Streaming availability reflects the dates in your catalog. Each average uses episodes with IMDb ratings.</p>
+    </section>
+    <section id="detail" hidden aria-labelledby="show-title">
+      <button type="button" class="secondary back" id="back">← Back to shows</button>
+      <div id="show-overview"></div>
+      <div id="season-list"></div>
+    </section>
+  </main>
+  <dialog id="watch-dialog" aria-labelledby="watch-title">
+    <form id="watch-form">
+      <p class="eyebrow">Shared watch history</p>
+      <h2 id="watch-title">Mark episode watched</h2>
+      <p id="watch-episode"></p>
+      <label>Household rating (optional, 0–10)<input name="rating" type="number" min="0" max="10" step="0.1" placeholder="Leave blank to skip"></label>
+      <p id="watch-error" class="notice" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="cancel-watch" class="secondary">Cancel</button>
+        <button type="submit" id="save-watch">Save watched episode</button>
+      </div>
+    </form>
+  </dialog>
+  <script id="connection-config" type="application/json">{"url":"https://xayntuwdftxxacchihxb.supabase.co","key":"sb_publishable_30-ccJO5eS1WeGLriYTFhA_6TVN_V2U"}</script>
+  <script>
+function buildCatalog({ shows, seasons, episodes, services, availability, progress }) {
+  const serviceById = new Map(services.map(service => [service.service_id, service]));
+  const progressByEpisode = new Map(progress.map(row => [row.episode_id, row]));
+  const byShow = new Map(shows.map(show => [show.show_id, {
+    ...show, seasons: [], episodes: [], services: [], averageRating: null,
+  }]));
+
+  for (const season of seasons) byShow.get(season.show_id)?.seasons.push(season);
+  for (const row of availability) {
+    const service = serviceById.get(row.service_id);
+    if (service) byShow.get(row.show_id)?.services.push({ ...service, last_checked_on: row.last_checked_on });
+  }
+  for (const episode of episodes) {
+    byShow.get(episode.show_id)?.episodes.push({
+      ...episode, progress: progressByEpisode.get(episode.episode_id) ?? null,
+    });
+  }
+
+  for (const show of byShow.values()) {
+    show.seasons.sort((a, b) => a.season_number - b.season_number);
+    show.episodes.sort((a, b) => a.season_number - b.season_number || a.episode_number - b.episode_number);
+    show.services.sort((a, b) => a.name.localeCompare(b.name));
+    const rated = show.episodes.filter(episode => episode.imdb_rating != null);
+    if (rated.length) {
+      show.averageRating = rated.reduce((total, episode) => total + Math.round(Number(episode.imdb_rating) * 10), 0)
+        / (rated.length * 10);
+    }
+  }
+  return [...byShow.values()].sort((a, b) => (b.averageRating ?? -1) - (a.averageRating ?? -1)
+    || a.title.localeCompare(b.title));
+}
+
+function filterCatalog(shows, { title, genre, award, service, minimum }) {
+  const search = title.trim().toLocaleLowerCase();
+  return shows.filter(show =>
+    show.title.toLocaleLowerCase().includes(search)
+    && (!genre || show.primary_genre === genre)
+    && (!award || show[award] === true)
+    && (!service || show.services.some(item => item.subscribed && (service === 'subscribed' || item.service_id === service)))
+    && (minimum === '' || (show.averageRating != null && show.averageRating >= Number(minimum))));
+}
+
+function viewingProgress(show) {
+  const total = show.episodes.length;
+  const watched = show.episodes.filter(episode => episode.progress !== null).length;
+  return {
+    total,
+    watched,
+    percent: total ? (100 * watched / total).toFixed(1) : '0.0',
+    next: show.episodes.find(episode => episode.progress === null) ?? null,
+  };
+}
+
+function localDate(date = new Date()) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+const tableQueries = {
+  shows: ['show_id::text,title,primary_genre,has_award_wins,has_award_nominations', 'show_id'],
+  seasons: ['show_id::text,season_number,release_date', 'show_id,season_number'],
+  episodes: ['episode_id::text,show_id::text,season_number,episode_number,title,imdb_rating', 'episode_id'],
+  services: ['service_id::text,name,subscribed', 'service_id'],
+  availability: ['show_id::text,service_id::text,last_checked_on', 'show_id,service_id'],
+  progress: ['episode_id::text,watched_on,our_rating,notes', 'episode_id'],
+};
+const tableNames = { services: 'streaming_services', availability: 'show_availability', progress: 'episode_progress' };
+
+function createDatabase({ url, key }) {
+  if (url !== 'https://xayntuwdftxxacchihxb.supabase.co' || !/^sb_publishable_[\w-]+$/.test(key)) {
+    throw new Error('The app requires the Final Project URL and its publishable key.');
+  }
+
+  async function request(table, parameters, options = {}) {
+    const response = await fetch(`${url}/rest/v1/${table}?${parameters}`, {
+      ...options,
+      headers: { apikey: key, 'Content-Type': 'application/json', ...options.headers },
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message ?? `Supabase returned HTTP ${response.status}.`);
+    }
+    return response.json();
+  }
+
+  async function readTable(name) {
+    const [select, order] = tableQueries[name];
+    const parameters = new URLSearchParams({ select, order, limit: 500 });
+    const rows = [];
+    while (true) {
+      parameters.set('offset', rows.length);
+      const page = await request(tableNames[name] ?? name, parameters);
+      if (!page.length) return rows;
+      rows.push(...page);
+    }
+  }
+
+  return {
+    async loadCatalog() {
+      const names = Object.keys(tableQueries);
+      const values = await Promise.all(names.map(readTable));
+      const catalog = Object.fromEntries(names.map((name, index) => [name, values[index]]));
+      if (!catalog.shows.length) throw new Error('No shows are visible. Check the Supabase read policies.');
+      return catalog;
+    },
+    async markWatched(episodeId, rating) {
+      const select = tableQueries.progress[0];
+      const parameters = new URLSearchParams({ select, on_conflict: 'episode_id' });
+      const [inserted] = await request('episode_progress', parameters, {
+        method: 'POST',
+        headers: { Prefer: 'resolution=ignore-duplicates,return=representation' },
+        // The database supplies watched_on. Existing progress survives retries.
+        body: JSON.stringify({ episode_id: episodeId, our_rating: rating }),
+      });
+      if (inserted) return inserted;
+      const [existing] = await request('episode_progress', new URLSearchParams({ select, episode_id: `eq.${episodeId}` }));
+      if (!existing) throw new Error('The saved row could not be read. Reload and check before trying again.');
+      return existing;
+    },
+  };
+}
+
+const byId = id => document.getElementById(id);
+const connection = byId('connection');
+const message = byId('message');
+const discover = byId('discover');
+const filters = byId('filters');
+const detail = byId('detail');
+const overview = byId('show-overview');
+const dialog = byId('watch-dialog');
+const watchForm = byId('watch-form');
+const watchError = byId('watch-error');
+const saveButton = byId('save-watch');
+const cancelButton = byId('cancel-watch');
+const openSeasons = new Set();
+let database;
+let shows = [];
+let selectedShow;
+let selectedEpisode;
+let saving = false;
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function button(text, onClick, className) {
+  const node = element('button', className, text);
+  node.type = 'button';
+  node.addEventListener('click', onClick);
+  return node;
+}
+
+function showMessage(text) {
+  message.textContent = text;
+  message.hidden = !text;
+}
+
+function addChoices(select, options, defaults) {
+  select.options.length = defaults;
+  for (const [value, label] of options) select.add(new Option(label, value));
+}
+
+function configureFilters(services) {
+  const genres = [...new Set(shows.map(show => show.primary_genre))].sort((a, b) => a.localeCompare(b));
+  addChoices(filters.elements.genre, genres.map(genre => [genre, genre]), 1);
+  const subscriptions = services.filter(service => service.subscribed).sort((a, b) => a.name.localeCompare(b.name));
+  addChoices(filters.elements.service, subscriptions.map(service => [service.service_id, service.name]), 2);
+  filters.reset();
+}
+
+function serviceTags(show, includeDate = false) {
+  const tags = element('div', 'tags');
+  for (const service of show.services) {
+    const label = service.subscribed ? `${service.name} · Subscribed` : service.name;
+    tags.append(element('span', service.subscribed ? 'tag subscribed' : 'tag',
+      includeDate ? `${label} · Checked ${service.last_checked_on}` : label));
+  }
+  if (!show.services.length) tags.append(element('span', 'muted', 'No availability recorded'));
+  return tags;
+}
+
+function ratingLabel(show) {
+  return element('p', 'rating', show.averageRating == null
+    ? 'Average episode IMDb rating unavailable'
+    : `${show.averageRating.toFixed(2)}/10 · Average episode IMDb rating`);
+}
+
+function awardLabel(show) {
+  const label = value => value == null ? 'Unknown' : value ? 'Yes' : 'No';
+  return element('p', 'muted', `Award wins: ${label(show.has_award_wins)} · Nominations: ${label(show.has_award_nominations)}`);
+}
+
+function renderCatalog() {
+  const matches = filterCatalog(shows, Object.fromEntries(new FormData(filters)));
+  byId('result-count').textContent = `${matches.length} of ${shows.length} shows`;
+  const results = byId('results');
+  results.replaceChildren();
+  if (!matches.length) results.append(element('p', 'panel empty', 'No shows match these filters.'));
+
+  for (const show of matches) {
+    const card = element('article', 'panel card');
+    const { watched, total, percent } = viewingProgress(show);
+    const title = element('h3');
+    const open = button(show.title, () => openShow(show), 'title-button');
+    open.dataset.showId = show.show_id;
+    title.append(open);
+    card.append(element('p', 'eyebrow', show.primary_genre), title, ratingLabel(show), awardLabel(show),
+      serviceTags(show), element('p', 'card-progress', `${watched} of ${total} watched · ${percent}%`));
+    results.append(card);
+  }
+}
+
+function episodeLabel(episode) {
+  return `S${episode.season_number} E${episode.episode_number} · ${episode.title}`;
+}
+
+function chooseEpisode(episode) {
+  selectedEpisode = episode;
+  watchForm.reset();
+  watchError.hidden = true;
+  byId('watch-episode').textContent = episodeLabel(episode);
+  dialog.showModal();
+}
+
+function renderDetail(focusId = 'show-title') {
+  const show = selectedShow;
+  const { total, watched, percent, next } = viewingProgress(show);
+  const title = element('h1', '', show.title);
+  title.id = 'show-title';
+  title.tabIndex = -1;
+  const header = element('div', 'intro');
+  header.append(element('p', 'eyebrow', show.primary_genre), title, ratingLabel(show), awardLabel(show), serviceTags(show, true));
+
+  const progress = element('div', 'panel progress-panel');
+  const progressText = element('div');
+  progressText.setAttribute('role', 'status');
+  const bar = element('progress');
+  bar.max = total || 1;
+  bar.value = watched;
+  bar.setAttribute('aria-label', 'Episode completion');
+  const nextLabel = next ? episodeLabel(next) : total ? 'All episodes watched' : 'No episodes in the catalog';
+  progressText.append(element('p', 'eyebrow', 'Shared viewing progress'),
+    element('h2', '', `${percent}% complete`), bar,
+    element('p', '', `${watched} of ${total} episodes watched`),
+    element('p', 'next', `Next unwatched: ${nextLabel}`));
+  progress.append(progressText);
+  if (next) {
+    const markNext = button('Mark next watched', () => chooseEpisode(next));
+    markNext.id = 'mark-next';
+    progress.append(markNext);
+  }
+  overview.replaceChildren(header, progress);
+
+  const seasonList = byId('season-list');
+  seasonList.replaceChildren(element('h2', 'season-heading', 'Episodes'));
+  for (const season of show.seasons) {
+    const number = season.season_number;
+    const episodes = show.episodes.filter(episode => episode.season_number === number);
+    const group = element('details', 'panel season');
+    group.open = openSeasons.has(number);
+    group.addEventListener('toggle', () => {
+      if (!group.isConnected) return;
+      if (group.open) openSeasons.add(number);
+      else openSeasons.delete(number);
+    });
+    const watchedCount = episodes.filter(episode => episode.progress).length;
+    group.append(element('summary', '', `Season ${number} · ${watchedCount}/${episodes.length} watched`));
+    const list = element('ul', 'episodes');
+    if (!episodes.length) list.append(element('li', 'episode', 'No cataloged episodes'));
+    for (const episode of episodes) {
+      const row = element('li', 'episode');
+      const info = element('div');
+      const record = episode.progress;
+      info.append(element('strong', '', episodeLabel(episode)),
+        element('p', 'muted', episode.imdb_rating == null ? 'IMDb rating unavailable' : `IMDb ${Number(episode.imdb_rating).toFixed(1)}/10`));
+      if (record) {
+        info.append(element('p', '', `Watched ${record.watched_on} · Household rating ${record.our_rating == null ? '—' : `${Number(record.our_rating).toFixed(1)}/10`}`));
+        if (record.notes) info.append(element('p', 'muted', record.notes));
+      }
+      row.append(info);
+      if (!record) {
+        const mark = button('Mark watched', () => chooseEpisode(episode), 'secondary');
+        mark.setAttribute('aria-label', `Mark ${episodeLabel(episode)} watched`);
+        row.append(mark);
+      }
+      list.append(row);
+    }
+    group.append(list);
+    seasonList.append(group);
+  }
+  (byId(focusId) ?? title).focus();
+}
+
+function openShow(show) {
+  selectedShow = show;
+  openSeasons.clear();
+  const next = viewingProgress(show).next;
+  if (next) openSeasons.add(next.season_number);
+  discover.hidden = true;
+  detail.hidden = false;
+  renderDetail();
+  window.scrollTo(0, 0);
+}
+
+byId('back').addEventListener('click', () => {
+  detail.hidden = true;
+  discover.hidden = false;
+  renderCatalog();
+  const previous = [...byId('results').querySelectorAll('button')].find(node => node.dataset.showId === selectedShow.show_id);
+  previous?.focus();
+});
+
+filters.addEventListener('input', renderCatalog);
+filters.addEventListener('submit', event => event.preventDefault());
+filters.addEventListener('reset', () => queueMicrotask(renderCatalog));
+cancelButton.addEventListener('click', () => dialog.close());
+dialog.addEventListener('cancel', event => {
+  if (saving) event.preventDefault();
+});
+
+watchForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const episode = selectedEpisode;
+  if (saving || !episode) return;
+  const input = watchForm.elements.rating.value;
+  saving = saveButton.disabled = cancelButton.disabled = true;
+  saveButton.textContent = 'Saving…';
+  watchError.hidden = true;
+  try {
+    episode.progress = await database.markWatched(episode.episode_id, input === '' ? null : Number(input));
+    dialog.close();
+    renderDetail('mark-next');
+  } catch (error) {
+    watchError.textContent = `Unable to save progress. ${error.message}`;
+    watchError.hidden = false;
+  } finally {
+    saving = saveButton.disabled = cancelButton.disabled = false;
+    saveButton.textContent = 'Save watched episode';
+  }
+});
+
+async function start() {
+  connection.textContent = 'Connecting to Supabase…';
+  try {
+    database = createDatabase(JSON.parse(byId('connection-config').textContent));
+    const data = await database.loadCatalog();
+    shows = buildCatalog(data);
+    discover.hidden = false;
+    connection.textContent = 'Live Supabase';
+    connection.title = 'ACC556 Final Project -- Will Robison';
+    configureFilters(data.services);
+    renderCatalog();
+    filters.elements.title.focus();
+  } catch (error) {
+    connection.textContent = 'Connection error';
+    showMessage(`Unable to open Show Tracker. ${error.message}`);
+    message.append(button('Retry connection', () => location.reload(), 'secondary'));
+  }
+}
+start();
+  </script>
+</body>
+</html>
