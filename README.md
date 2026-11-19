@@ -6,4 +6,10 @@ The app runs offline with a 60-show snapshot of the Supabase catalog and the ori
 
 ## Development
 
+## SQL and Supabase
+
+The [discovery and progress query](sql/discovery_progress.sql) can be run in the SQL Editor of ACC556 Final Project -- Will Robison. It returns subscribed shows, average episode IMDb ratings, completion percentages, and each show's first unwatched episode.
+
+The downloadable app uses a bundled snapshot. Its catalog filters and progress calculations are in [public/catalog.js](public/catalog.js), and its browser storage writes are in [public/app.js](public/app.js). Running the SQL separately queries live Supabase. Changes saved in the offline app stay in that browser.
+
 The standalone HTML contains the interface, catalog, and browser storage logic. From the full course workspace run `node phase4/prepare-local.mjs` to regenerate the sample catalog. From this repository run `node build.mjs` to rebuild the HTML and `node --test` to check catalog and progress calculations. Use `node server.js` to preview the same HTML at a local browser address.
